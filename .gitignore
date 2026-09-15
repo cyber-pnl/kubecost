@@ -1,0 +1,24 @@
+# Logs de simulation
+scripts/logs/*.log
+!scripts/logs/.gitkeep
+
+# Rapports de chargeback générés
+chargeback/reports/*.csv
+chargeback/reports/*.html
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Environnements & outils
+.kube/
+.env
+*.kubeconfig
+
+# Éditeurs
+.vscode/
+.idea/
+*.swp
+.DS_Store
