@@ -30,19 +30,21 @@ flowchart LR
 
 ---
 
-## Phase 1 — Cluster k3d
+## Phase 1 — Cluster k3d ✅
 
 **Objectif** : cluster multi-node reproductible pour la démo.
 
-- [ ] `cluster/k3d-config.yaml` — config déclarative :
-  - 1 server, 3 agents
-  - ports mappés (api-server, 9090 pour Kubecost)
-  - volumes si besoin (persistance Prometheus)
-- [ ] `cluster/setup-cluster.sh` — provisioning + validation `kubectl get nodes`, install metrics-server
-- [ ] `cluster/teardown-cluster.sh` — suppression propre
-- [ ] Test : création < 2 min, recréation à l'identique via config
+- [x] `cluster/k3d-config.yaml` — config déclarative k3d v1alpha5 :
+  - 1 server + 3 agents
+  - API server sur port hôte 7443 (6443 occupé par le k3s système) — Kubecost non exposé (règle sécurité, port-forward uniquement)
+  - traefik désactivé, `servicelb` conservé pour les LoadBalancer
+- [x] `cluster/setup-cluster.sh` — provisioning idempotent + attente nodes Ready + boucle d'attente metrics-server (`kubectl top`)
+- [x] `cluster/teardown-cluster.sh` — suppression propre
+- [x] Test : création reproductible via config, 4 nodes Ready, `kubectl top nodes` OK
 
-**Critère de réussite** : `./cluster/setup-cluster.sh` produit 4 nodes Ready en < 2 min, deux fois de suite.
+> Notes d'environnement : le démarrage k3s y est lent (pulls d'images) → `options.k3d.timeout: 600s` obligatoire, sinon k3d abort à tort.
+
+**Critère de réussite** : `./cluster/setup-cluster.sh` produit 4 nodes Ready, deux fois de suite (vérifié ✅).
 
 ---
 
@@ -146,7 +148,7 @@ Pour chaque équipe (dossier `teams/team-*/`) :
 ## État d'avancement global
 
 - [x] Phase 0 (partiel) — conventions & docs
-- [ ] Phase 1 — cluster k3d
+- [x] Phase 1 — cluster k3d
 - [ ] Phase 2 — Kubecost + pricing
 - [ ] Phase 3 — 4 équipes simulées
 - [ ] Phase 4 — scripts de simulation

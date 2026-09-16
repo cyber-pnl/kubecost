@@ -1,0 +1,34 @@
+---
+apiVersion: k3d.io/v1alpha5
+kind: Simple
+metadata:
+  name: kubecost-lab
+
+# 1 server (control plane) + 3 agents pour un multi-node réaliste.
+servers: 1
+agents: 3
+
+# API server mappé sur le port hôte 7443 → kubeconfig prévisible.
+# NOTE : 6443 est déjà utilisé par le k3s système de cette machine.
+kubeAPI:
+  hostPort: "7443"
+
+# NOTE sécurité : dashboard Kubecost volontairement NON mappé.
+# Règle AGENTS.md : accès uniquement via `kubectl port-forward`.
+ports: []
+
+options:
+  k3d:
+    wait: true
+    # Environnement de dev lent (pulls + démarrage k3s) → timeout généreux.
+    timeout: 600s
+  k3s:
+    extraArgs:
+      # Pas d'ingress (traefik) pour ce lab ; servicelb reste actif
+      # pour les Services LoadBalancer (scénario team-search).
+      - arg: --disable=traefik
+        nodeFilters:
+          - server:*
+  kubeconfig:
+    updateDefaultKubeconfig: true
+    switchCurrentContext: true
