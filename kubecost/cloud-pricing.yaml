@@ -1,0 +1,31 @@
+---
+## Kubecost — pricing custom on-premise (cluster k3d)
+##
+## Un cluster k3d n'a pas de facturation cloud : sans tarifs explicites,
+## Kubecost retombe sur ses valeurs par défaut. On fournit ici un modèle de
+## coût on-premise (serveurs amortis / interne) pour que l'allocation, le
+## chargeback et les recommandations FinOPS reposent sur un tarif réaliste.
+##
+## Format kubecostProductConfigs.defaultModelPricing : prix MENSUELS d'une
+## unité de ressource. Kubecost considère 730 h par mois ; les valeurs
+## horaires en commentaire en découlent (prix / 730).
+##
+## Ref : IBM Docs Kubecost - Installing in air-gapped environments
+
+kubecostProductConfigs:
+  # Ce modèle de prix devient la vue par défaut (on-prem)
+  customPricesEnabled: true
+  defaultModelPricing:
+    enabled: true
+    #                        prix/mois   équivalent/h (÷730)
+    CPU: "30.0"           # $/vCPU  → $0.0411/core-h
+    spotCPU: "12.0"       # non utilisé (pas de spot k3d)
+    RAM: "4.0"            # $/GiB   → $0.00548/GiB-h
+    spotRAM: "1.6"        # non utilisé (pas de spot k3d)
+    GPU: "700.0"          # aucun GPU dans le lab
+    spotGPU: "225.0"      # non utilisé
+    storage: "0.10"       # $/GiB   → $0.000137/GiB-h (local/SSD)
+    # Réseau : pas d'egress cloud sur un cluster bare-metal / k3d
+    zoneNetworkEgress: "0.0"
+    regionNetworkEgress: "0.0"
+    internetNetworkEgress: "0.0"

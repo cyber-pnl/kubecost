@@ -48,18 +48,29 @@ flowchart LR
 
 ---
 
-## Phase 2 — Kubecost + pricing custom
+## Phase 2 — Kubecost + pricing custom ✅
 
 **Objectif** : monitoring de coûts opérationnel avec un tarif crédible pour k3d.
 
-- [ ] `kubecost/install-kubecost.sh` — helm repo + install chart `cost-analyzer`
-- [ ] `kubecost/values.yaml` — allocation par namespace/label/annotation, retention, `service.type: ClusterIP`
-- [ ] `kubecost/cloud-pricing.yaml` — tarif custom on-prem :
-  - vCPU/h, Gi RAM/h, Gi storage/h, coût réseau
-- [ ] Vérification : dashboard via `port-forward 9090`, données d'allocation après ≥ 15 min
-- [ ] Documentation du choix de pricing (pourquoi tel tarif → [finops-practices.md](finops-practices.md))
+- [x] `kubecost/install-kubecost.sh` — helm repo + install chart `cost-analyzer` (idempotent)
+- [x] `kubecost/values.yaml` — config allégée : mapping labels (`team`/`product`/`env`), `service.type: ClusterIP`, Grafana/forecasting/PVC désactivés
+- [x] `kubecost/cloud-pricing.yaml` — `kubecostProductConfigs.defaultModelPricing` (prix mensuels, base 730 h) :
+  - CPU `$30`/vCPU-mois, RAM `$4`/GiB-mois, storage `$0.10`/GiB-mois, réseau egress `$0`
+- [x] Vérification : pods Ready, API up, pricing custom appliqué, scraping Prometheus OK
+- [x] Documentation du choix de pricing (voir [kubecost/README.md](../kubecost/README.md) + [finops-practices.md](finops-practices.md))
+
+> **Version du chart** : 2.9.x est un chart de migration 3.0 qui exige un object-store
+> (`global federated-store`) → on utilise **2.8.7**, dernière 2.x autonome.
+>
+> **Note KSM** : le cost-model émet lui-même les métriques de type kube-state-metrics
+> (`kube_pod_labels`, `container_cpu_allocation`, `node_cpu_hourly_cost`) → pas besoin
+> de déployer `kube-state-metrics` séparément.
 
 **Critère de réussite** : `curl localhost:9090/model/allocation?window=15m` retourne des données cohérentes avec la config pricing.
+
+Vérifié ✅ : `node_cpu_hourly_cost=0.041096` (= 30/730) et `node_ram_hourly_cost=0.005479`
+(= 4/730) sur les 4 nodes ; `kube_pod_labels` présent (11 séries) ; `provider: custom`.
+L'allocation par `label:team` sera peuplée en Phase 3.
 
 ---
 
@@ -149,7 +160,7 @@ Pour chaque équipe (dossier `teams/team-*/`) :
 
 - [x] Phase 0 (partiel) — conventions & docs
 - [x] Phase 1 — cluster k3d
-- [ ] Phase 2 — Kubecost + pricing
+- [x] Phase 2 — Kubecost + pricing
 - [ ] Phase 3 — 4 équipes simulées
 - [ ] Phase 4 — scripts de simulation
 - [ ] Phase 5 — chargeback & rapports

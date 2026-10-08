@@ -1,0 +1,68 @@
+---
+## Kubecost — valeurs d'installation (lab k3d)
+## Chart : kubecost/cost-analyzer 2.9.7
+##
+## Le pricing on-prem est défini dans cloud-pricing.yaml, fusionné au
+## déploiement :
+##   helm upgrade --install ... -f values.yaml -f cloud-pricing.yaml
+##
+## Fichier volontairement allégé : l'hôte n'a que ~7.6 Gi de RAM. Sont
+## désactivés Grafana, forecasting, alertmanager, pushgateway, node-exporter
+## et toute persistance (données non durables, acceptable en lab).
+
+global:
+  clusterId: kubecost-lab
+  prometheus:
+    enabled: true
+  # Dashboard exposé via `kubectl port-forward` uniquement (cf. AGENTS.md).
+  grafana:
+    enabled: false
+    proxy: false
+
+# Identité produit : mapping des labels de notre convention (cf. AGENTS.md)
+kubecostProductConfigs:
+  currencyCode: USD
+  labelMappingConfigs:
+    enabled: true
+    team_label: team
+    product_label: product
+    environment_label: env
+
+# Forecast = container supplémentaire lourd, non utilisé dans le lab
+forecasting:
+  enabled: false
+
+# Persistance de la config Kubecost désactivée (wiped au restart, OK en lab)
+persistentVolume:
+  enabled: false
+
+prometheus:
+  # Pas d'alerting dans le lab
+  alertmanager:
+    enabled: false
+  pushgateway:
+    enabled: false
+  # node-exporter = DaemonSet sur 4 nodes ; inutile pour l'allocation cAdvisor
+  nodeExporter:
+    enabled: false
+  kube-state-metrics:
+    enabled: true
+  server:
+    global:
+      external_labels:
+        cluster_id: kubecost-lab
+    retention: 7d
+    persistentVolume:
+      enabled: false
+    resources:
+      requests:
+        cpu: 100m
+        memory: 256Mi
+      limits:
+        memory: 800Mi
+
+# Admission controller / audit d'événements : désactivés
+kubecostAdmissionController:
+  enabled: false
+costEventsAudit:
+  enabled: false
