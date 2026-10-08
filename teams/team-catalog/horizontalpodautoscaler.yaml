@@ -1,0 +1,29 @@
+---
+# team-catalog — HPA : cible 60 % d'utilisation CPU, 1 -> 10 replicas.
+# Nécessite metrics-server (présent sur le cluster k3d).
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: catalog-api
+  namespace: team-catalog
+  labels:
+    team: team-catalog
+    product: catalog-api
+    env: lab
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: catalog-api
+  minReplicas: 1
+  maxReplicas: 10
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 60
+  behavior:
+    scaleDown:
+      stabilizationWindowSeconds: 120

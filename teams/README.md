@@ -23,3 +23,28 @@ Namespaces et workloads des 4 équipes fictives. Chaque équipe a un **profil de
 - Sur-dimensionnement intentionnel documenté en commentaire.
 - Scénarios détaillés : [docs/scenarios.md](../docs/scenarios.md).
 - Règles détaillées : [docs/agents/rules.md](../docs/agents/rules.md) → `Équipes simulées`.
+
+## Déploiement
+
+`kubectl apply -R -f teams/` trie les fichiers par ordre alphabétique : les
+`deployment.yaml` passent **avant** leur `namespace.yaml`. Appliquer donc en
+deux passes (ou namespaces d'abord) :
+
+```bash
+kubectl apply -R -f teams/            # 1re passe : crée les namespaces
+kubectl apply -R -f teams/            # 2e passe : crée les workloads
+```
+
+Vérif :
+
+```bash
+kubectl get pods -A | grep team-
+kubectl -n team-catalog get hpa
+```
+
+## Notes d'environnement
+
+- Le LB orphelin de `team-search` écoute sur le **port 8081** (et non 80) :
+  le `my-wordpress` du namespace `default` (hors scope lab) bind déjà le
+  host port 80 sur les 4 nodes via klipper-lb → un 2e LB sur 80 resterait
+  `Pending` (conflit de ports).

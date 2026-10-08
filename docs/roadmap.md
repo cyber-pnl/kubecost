@@ -74,24 +74,34 @@ L'allocation par `label:team` sera peuplée en Phase 3.
 
 ---
 
-## Phase 3 — Les 4 équipes simulées
+## Phase 3 — Les 4 équipes simulées ✅
 
 **Objectif** : 4 namespaces isolés avec profiles de consommation contrastés.
 
 Pour chaque équipe (dossier `teams/team-*/`) :
 
-- [ ] `namespace.yaml` — labels (team/product/env) + ResourceQuota + LimitRange
-- [ ] `deployment.yaml` — workloads légers (`http-echo`, `nginx`, `postgres`) avec requests/limits documentés
-- [ ] `behavior.md` — comportement simulé + signal Kubecost attendu
-- [ ] ResourceQuota/LimitRange par namespace
+- [x] `namespace.yaml` — labels (team/product/env) + ResourceQuota + LimitRange
+- [x] `deployment.yaml` — workloads légers (`http-echo`, `nginx`, `postgres`) avec requests/limits documentés
+- [x] `behavior.md` — comportement simulé + signal Kubecost attendu
+- [x] ResourceQuota/LimitRange par namespace
 
 ### Profils attendus (détail dans [scenarios.md](scenarios.md))
-- `team-checkout` : requests 1 CPU/2Gi, usage ~0.1 CPU (sur-provisionnement volontaire)
-- `team-catalog` : requests raisonnables + `horizontalpodautoscaler.yaml` (1→10)
-- `team-search` : deployment postgres + PVC `storageClass`, Service LoadBalancer, sans workload actif derrière
-- `team-platform` : requests = usage réel, baseline
+- `team-checkout` : requests 1 CPU/2Gi, usage ~0.1 CPU (sur-provisionnement volontaire) — `hashicorp/http-echo`
+- `team-catalog` : requests raisonnables + `horizontalpodautoscaler.yaml` (1→10, cible 60 % CPU) — `nginx`
+- `team-search` : deployment postgres + PVC `local-path` 5Gi (non monté) + Service LoadBalancer port 8081 — orphelins
+- `team-platform` : requests = usage réel, baseline — `nginx`
+
+> **Environnement** : le `my-wordpress` du namespace `default` (hors lab) bind
+> déjà le host port 80 sur les 4 nodes via klipper-lb → le LB orphelin de
+> `team-search` utilise le **port 8081** pour pouvoir allouer ses IP.
 
 **Critère de réussite** : `kubectl apply -f teams/` déploie tout ; Kubecost affiche 4 namespaces avec labels corrects.
+
+Vérifié ✅ : 4 pods Running (checkout, catalog, search-db, platform), HPA actif
+(`cpu: 1%/60%`), LB orphelin avec 4 IP externes, et `label_team`/`label_product`/
+`label_env` bien scrapés par Prometheus pour les 4 équipes. L'allocation par
+`label:team` se peuple après le warm-up ETL (~25 min) de Kubecost.
+Apply en deux passes (`kubectl apply -R -f teams/`), cf. [teams/README.md](../teams/README.md).
 
 ---
 
@@ -161,7 +171,7 @@ Pour chaque équipe (dossier `teams/team-*/`) :
 - [x] Phase 0 (partiel) — conventions & docs
 - [x] Phase 1 — cluster k3d
 - [x] Phase 2 — Kubecost + pricing
-- [ ] Phase 3 — 4 équipes simulées
+- [x] Phase 3 — 4 équipes simulées
 - [ ] Phase 4 — scripts de simulation
 - [ ] Phase 5 — chargeback & rapports
 - [ ] Phase 6 — démo & validation

@@ -1,0 +1,61 @@
+---
+# team-checkout — API REST factice, volontairement sur-dimensionnée.
+# Derived from docs/scenarios.md — Scénario 1 (over-provisioning).
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: checkout-api
+  namespace: team-checkout
+  labels:
+    team: team-checkout
+    product: checkout-api
+    env: lab
+    app: checkout-api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: checkout-api
+  template:
+    metadata:
+      labels:
+        team: team-checkout
+        product: checkout-api
+        env: lab
+        app: checkout-api
+    spec:
+      containers:
+        - name: checkout-api
+          image: hashicorp/http-echo:0.2.3
+          args:
+            - -text=checkout ok
+            - -listen=:5678
+          ports:
+            - name: http
+              containerPort: 5678
+          # over-provisioning intent: 90% waste for demo
+          # Charge réelle ~0.1 CPU / 256Mi, requests figées à 1 CPU / 2Gi.
+          resources:
+            requests:
+              cpu: "1"
+              memory: 2Gi
+            limits:
+              cpu: "1"
+              memory: 2Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: checkout-api
+  namespace: team-checkout
+  labels:
+    team: team-checkout
+    product: checkout-api
+    env: lab
+spec:
+  selector:
+    app: checkout-api
+  ports:
+    - name: http
+      port: 80
+      targetPort: 5678

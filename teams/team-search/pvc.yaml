@@ -1,0 +1,23 @@
+---
+# team-search — PVC orphelin.
+#
+# Créé mais JAMAIS monté par un pod : c'est un coût de stockage "caché".
+# Sur k3d, le provisioner par défaut est `local-path` en mode
+# WaitForFirstConsumer -> le PVC reste Pending tant qu'aucun pod ne le
+# consomme. Le script scripts/simulate_orphan_resources.sh (Phase 5) crée
+# brièvement un pod pour le binder, puis le supprime en laissant le PVC.
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: search-data-orphan
+  namespace: team-search
+  labels:
+    team: team-search
+    product: search-db
+    env: lab
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi

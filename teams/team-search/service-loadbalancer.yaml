@@ -1,0 +1,26 @@
+---
+# team-search — Service LoadBalancer SANS backend.
+#
+# `selector` volontairement vide : aucune pod ne correspond. k3d (servicelb)
+# assigne quand même une IP externe -> coût réseau facturé à team-search
+# sans aucun trafic applicatif réel derrière.
+apiVersion: v1
+kind: Service
+metadata:
+  name: search-lb-orphan
+  namespace: team-search
+  labels:
+    team: team-search
+    product: search-db
+    env: lab
+spec:
+  type: LoadBalancer
+  # Pas de selector : backend inexistant (orphan volontaire).
+  # selector: {}
+  ports:
+    # Port 8081 (et non 80) : le LB `my-wordpress` (namespace default, hors
+    # scope du lab) bond déjà le host port 80 sur les 4 nodes via klipper-lb ;
+    # un 2e LB sur 80 ne pourrait pas placer ses pods svclb (pending).
+    - name: http
+      port: 8081
+      targetPort: 8081

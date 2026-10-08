@@ -1,0 +1,70 @@
+---
+# team-platform — stack monitoring légère, bien dimensionnée.
+# Derived from docs/scenarios.md — Scénario 4 / baseline de référence.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: platform-metrics
+  namespace: team-platform
+  labels:
+    team: team-platform
+    product: platform-observability
+    env: lab
+    app: platform-metrics
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: platform-metrics
+  template:
+    metadata:
+      labels:
+        team: team-platform
+        product: platform-observability
+        env: lab
+        app: platform-metrics
+    spec:
+      containers:
+        - name: platform-metrics
+          image: nginx:1.27-alpine
+          ports:
+            - name: http
+              containerPort: 80
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 80
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 80
+            initialDelaySeconds: 10
+            periodSeconds: 20
+          # baseline intent: requests alignés sur l'usage mesuré
+          # requests ~= usage réel => efficiency ~100 % (référence).
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 200m
+              memory: 384Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: platform-metrics
+  namespace: team-platform
+  labels:
+    team: team-platform
+    product: platform-observability
+    env: lab
+spec:
+  selector:
+    app: platform-metrics
+  ports:
+    - name: http
+      port: 80
+      targetPort: 80

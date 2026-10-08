@@ -1,0 +1,51 @@
+---
+# team-search — petite base postgres "oubliée", réellement inutilisée.
+# Derived from docs/scenarios.md — Scénario 3 (ressources orphelines).
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: search-db
+  namespace: team-search
+  labels:
+    team: team-search
+    product: search-db
+    env: lab
+    app: search-db
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: search-db
+  template:
+    metadata:
+      labels:
+        team: team-search
+        product: search-db
+        env: lab
+        app: search-db
+    spec:
+      containers:
+        - name: postgres
+          image: postgres:16-alpine
+          env:
+            # Auth trust : démo uniquement, base non exposée (ClusterIP absent).
+            - name: POSTGRES_HOST_AUTH_METHOD
+              value: trust
+          ports:
+            - name: postgres
+              containerPort: 5432
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/postgresql/data
+          # Volontairement sous-utilisée : aucune requête applicative.
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 200m
+              memory: 512Mi
+      volumes:
+        # emptyDir (pas le PVC orphelin) : la base tourne mais ne sert à rien.
+        - name: data
+          emptyDir: {}

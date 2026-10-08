@@ -1,0 +1,52 @@
+---
+# team-catalog — namespace + garde-fous
+# Profil : autoscaling HPA (1 -> 10). Voir behavior.md.
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: team-catalog
+  labels:
+    team: team-catalog
+    product: catalog-api
+    env: lab
+---
+# Quota dimensionné pour laisser le HPA monter jusqu'à 10 replicas
+# (10 x 100m requests = 1 CPU ; 10 x 200m limits = 2 CPU).
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: team-catalog-quota
+  namespace: team-catalog
+  labels:
+    team: team-catalog
+    product: catalog-api
+    env: lab
+spec:
+  hard:
+    requests.cpu: "2"
+    requests.memory: 2Gi
+    limits.cpu: "4"
+    limits.memory: 4Gi
+    pods: "20"
+---
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: team-catalog-limitrange
+  namespace: team-catalog
+  labels:
+    team: team-catalog
+    product: catalog-api
+    env: lab
+spec:
+  limits:
+    - type: Container
+      default:
+        cpu: 200m
+        memory: 256Mi
+      defaultRequest:
+        cpu: 100m
+        memory: 128Mi
+      max:
+        cpu: "1"
+        memory: 1Gi
