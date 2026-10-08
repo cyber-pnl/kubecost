@@ -105,19 +105,24 @@ Apply en deux passes (`kubectl apply -R -f teams/`), cf. [teams/README.md](../te
 
 ---
 
-## Phase 4 — Scripts de simulation
+## Phase 4 — Scripts de simulation ✅
 
 **Objectif** : rendre chaque pattern de coût rejouable et corrélé à des logs.
 
-- [ ] `scripts/common.sh` — helpers (logs horodatés, logging utils), `set -euo pipefail`
-- [ ] `scripts/simulate_overprovisioning.sh` — applique team-checkout, journalise
-- [ ] `scripts/simulate_traffic_spike.sh` — lance Job k6/hey + `kubectl scale` vs HPA, capture replicas
-- [ ] `scripts/simulate_orphan_resources.sh` — PVC détaché, LB sans backend, Job terminé
-- [ ] `scripts/simulate_idle_waste.sh` — pods au repos 24/7 avec requests élevées
-- [ ] `scripts/reset_scenario.sh` — nettoyage complet des namespaces/ressources (idempotent)
-- [ ] Logs horodatés écrits dans `scripts/logs/`
+- [x] `scripts/common.sh` — helpers (logs horodatés, `set -euo pipefail`, pré-requis)
+- [x] `scripts/simulate_overprovisioning.sh` — applique team-checkout, journalise usage
+- [x] `scripts/simulate_traffic_spike.sh` — Job `hey` + HPA, capture replicas/CPU (défauts réglés pour un scaling visible)
+- [x] `scripts/simulate_orphan_resources.sh` — PVC détaché (bind puis abandon), LB sans backend, Job terminé non nettoyé
+- [x] `scripts/simulate_idle_waste.sh` — pods au repos 24/7 avec requests élevées
+- [x] `scripts/reset_scenario.sh` — nettoyage complet des namespaces (idempotent)
+- [x] Logs horodatés écrits dans `scripts/logs/`
 
 **Critère de réussite** : chaque script tourne deux fois (rejouable), produit un log horodaté, et son effet est visible dans Kubecost après ~15 min.
+
+Testé ✅ : chaque simulateur + `reset_scenario.sh` exécutés (rejouables), spike observé
+**1 → 4 → 8 replicas** avec `hey` (nginx plafonné à ses limits 200m — voir
+[scripts/README.md](../scripts/README.md) pour régler `SPIKE_RATE` jusqu'à 10).
+Logs dans `scripts/logs/`.
 
 ---
 
@@ -172,7 +177,7 @@ Apply en deux passes (`kubectl apply -R -f teams/`), cf. [teams/README.md](../te
 - [x] Phase 1 — cluster k3d
 - [x] Phase 2 — Kubecost + pricing
 - [x] Phase 3 — 4 équipes simulées
-- [ ] Phase 4 — scripts de simulation
+- [x] Phase 4 — scripts de simulation
 - [ ] Phase 5 — chargeback & rapports
 - [ ] Phase 6 — démo & validation
 - [ ] Phase 7 — bonus
