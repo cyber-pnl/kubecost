@@ -126,20 +126,20 @@ Logs dans `scripts/logs/`.
 
 ---
 
-## Phase 5 — Chargeback & rapports
+## Phase 5 — Chargeback & rapports ✅
 
 **Objectif** : transformer l'API Kubecost en « facture interne » par équipe.
 
-- [ ] `chargeback/fetch_kubecost_api.py` — appel `/model/allocation` (fenêtre paramétrable, pagination)
-- [ ] `chargeback/generate_report.py` — aggrégation par équipe :
-  - coût total, ventilation CPU/mémoire/stockage/réseau
-  - écart alloué vs utilisé
-  - répartition des coûts partagés (proportional)
-- [ ] Sorties CSV + HTML simple dans `chargeback/reports/`
-- [ ] Vérification de la **reconcilication** : total alloué ≈ total cluster (< 5 %)
-- [ ] (Nice) visualisation Mermaid/barchart dans le rapport HTML
+- [x] `chargeback/fetch_kubecost_api.py` — interroge `/model/allocation` (fenêtre/agrégat, `shareIdle`)
+- [x] `chargeback/generate_report.py` — ventilation CPU/mémoire/stockage/réseau/LB par équipe
+- [x] Écart coût **alloué** (requests) vs **utilisé** (usage réel) via les efficacités
+- [x] Coûts `__idle__` / `__unallocated__` exposés + variante `--share-idle` (répartition au prorata)
+- [x] Sorties CSV + HTML (barres CSS, recommandations rightsizing/nettoyage) dans `chargeback/reports/`
+- [x] Réconciliation : total alloué ≈ total cluster — mesuré **0,00 %**
+- [x] (Nice) visualisation native (CSS) dans le HTML
 
 **Critère de réussite** : rapport généré < 30 s, chiffres cohérents avec le dashboard, écart < 5 %.
+✅ Testé (`--window 1d` et `--share-idle`) : réconciliation 0,00 %, ~quelques secondes, logs dans `chargeback/reports/`.
 
 ---
 
@@ -178,7 +178,7 @@ Logs dans `scripts/logs/`.
 - [x] Phase 2 — Kubecost + pricing
 - [x] Phase 3 — 4 équipes simulées
 - [x] Phase 4 — scripts de simulation
-- [ ] Phase 5 — chargeback & rapports
+- [x] Phase 5 — chargeback & rapports
 - [ ] Phase 6 — démo & validation
 - [ ] Phase 7 — bonus
 

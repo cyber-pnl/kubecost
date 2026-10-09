@@ -5,6 +5,7 @@ scripts/logs/*.log
 # Rapports de chargeback générés
 chargeback/reports/*.csv
 chargeback/reports/*.html
+chargeback/reports/*.json
 
 # Python
 __pycache__/
