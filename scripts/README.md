@@ -5,10 +5,12 @@ Scripts Bash **rejouables** qui déclenchent les comportements de coût à obser
 | Script | Effet |
 |---|---|
 | `common.sh` | Helpers : logging horodaté, pré-requis (`set -euo pipefail`) |
+| `deploy_teams.sh` | Déploie les 4 équipes (2 passes : namespaces puis workloads) |
 | `simulate_overprovisioning.sh` | Applique `team-checkout` (requests très hautes, usage minime) |
 | `simulate_traffic_spike.sh` | Job `hey` + scaling HPA sur `team-catalog` |
 | `simulate_orphan_resources.sh` | PVC détaché (bind), LoadBalancer sans backend, Job terminé |
 | `simulate_idle_waste.sh` | Pods 24/7 au repos avec requests élevées |
+| `rightsize_demo.sh` | Rightsizing `team-checkout` + estimation d'économie (`--revert`) |
 | `reset_scenario.sh` | Nettoyage complet des namespaces (rejouable démo) |
 | `demo_full.sh` | Enchaîne reset → deploy → simulations → rapport (Phase 6) |
 

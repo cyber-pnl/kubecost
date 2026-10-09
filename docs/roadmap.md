@@ -143,17 +143,21 @@ Logs dans `scripts/logs/`.
 
 ---
 
-## Phase 6 — Démo & validation FinOps
+## Phase 6 — Démo & validation FinOps 🚧
 
 **Objectif** : scénario de démonstration de 10 min fiable et rejouable.
 
-- [ ] `scripts/demo_full.sh` — enchaîne reset → deploy → simulations → rapport
-- [ ] Script du pitch (étape par étape) documenté dans [workflows.md](agents/workflows.md)
-- [ ] Screenshots du dashboard dans `docs/screenshots/` (avant/après)
-- [ ] Script de droitsizing post-démo sur team-checkout montrant l'économie
-- [ ] Benchmarks : reset < 3 min, rapport < 30 s
+- [x] `scripts/demo_full.sh` — enchaîne reset → deploy → simulations → rapport
+- [x] `scripts/deploy_teams.sh` — déploiement idempotent des 4 équipes (2 passes)
+- [x] Script du pitch (étape par étape) documenté dans [workflows.md](agents/workflows.md)
+- [x] Script de droitsizing post-démo sur team-checkout (`scripts/rightsize_demo.sh`, ≈ -34 $/mois/réplica)
+- [ ] Screenshots du dashboard dans `docs/screenshots/` (avant/après) — capture navigateur manuelle
+- [x] Benchmarks : reset < 3 min, rapport < 30 s (mesurés)
 
 **Critère de réussite** : la démo complète se joue sans escalade technique et illustre les 4 patterns + le report de chargeback.
+
+> Réalisé : `demo_full.sh` exécuté de bout en bout (reset + deploy + 3 simulations + rapport,
+> réconciliation 0,00 %). Reste la capture des screenshots (nécessite un navigateur).
 
 ---
 

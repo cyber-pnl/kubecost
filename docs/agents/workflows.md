@@ -16,8 +16,10 @@ Procédures opérationnelles à suivre selon le contexte de travail.
 ### Vérifications avant merge
 ```bash
 yamllint cluster/ kubecost/ teams/          # YAML valides
-shellcheck cluster/*.sh scripts/*.sh        # Bash robuste
-ruff check chargeback/                      # Python conforme
+shellcheck cluster/*.sh scripts/*.sh        # Bash robuste (si dispo)
+bash -n scripts/*.sh                        # fallback syntaxe Bash
+ruff check chargeback/                      # Python conforme (si dispo)
+python3 -m py_compile chargeback/*.py       # fallback compilation Python
 ```
 
 ---
@@ -27,31 +29,41 @@ ruff check chargeback/                      # Python conforme
 Un déroulé pilote pour une démo live sans accroc.
 
 ```bash
-# 1. CAMÉRA — reset total
+# 1. CAMÉRA — reset total (supprime les 4 namespaces d'équipe)
 ./scripts/reset_scenario.sh
 
-# 2. Cluster sain
+# 2. Cluster sain + Kubecost prêt
 kubectl get nodes                              # tous Ready
-
-# 3. Kubecost prêt
 kubectl get pods -n kubecost                   # cost-analyzer Running
-kubectl port-forward svc/kubecost-cost-analyzer -n kubecost 9090:9090 &
 
-# 4. Déploiement des 4 équipes
-kubectl apply -f teams/
+# 3. Déploiement des 4 équipes (2 passes : namespaces puis workloads)
+./scripts/deploy_teams.sh
 
-# 5. Simulations (une par comportement, en expliquant)
-./scripts/simulate_overprovisioning.sh         # team-checkout
-./scripts/simulate_traffic_spike.sh            # team-catalog
-./scripts/simulate_orphan_resources.sh         # team-search
+# 4. Simulations (une par comportement, en expliquant)
+./scripts/simulate_overprovisioning.sh         # team-checkout (requests énormes)
+./scripts/simulate_orphan_resources.sh         # team-search (PVC/LB/Job orphelins)
+./scripts/simulate_idle_waste.sh               # pods au repos 24/7
+./scripts/simulate_traffic_spike.sh            # team-catalog (HPA, ~5 min)
 
-# 6. Attendre la collecte (~15 min) puis montrer le dashboard
+# 5. Attendre la collecte (~15 min) puis montrer le dashboard
+kubectl -n kubecost port-forward svc/kubecost-cost-analyzer 9090:9090 &
 
-# 7. Chargeback
-python chargeback/fetch_kubecost_api.py
-python chargeback/generate_report.py --format html
+# 6. Chargeback (allocation directe puis idle réparti)
+python3 chargeback/generate_report.py --window 1d
+python3 chargeback/generate_report.py --window 1d --share-idle
 
-# 8. Proposition de rightsizing sur team-checkout → rejouer pour l'économie
+# 7. Proposition de rightsizing sur team-checkout (≈ -34 $/mois/réplica)
+./scripts/rightsize_demo.sh
+./scripts/rightsize_demo.sh --revert           # remettre le sur-dimensionnement
+```
+
+**Raccourci** — tout enchaîner (reset → deploy → simulations → rapport) :
+
+```bash
+./scripts/demo_full.sh                # reset inclus
+./scripts/demo_full.sh --keep         # sans reset (état courant)
+./scripts/demo_full.sh --spike        # ajoute le pic de charge (lent)
+./scripts/demo_full.sh --window 1d    # fenêtre du rapport
 ```
 
 ### Points de vigilance démo
