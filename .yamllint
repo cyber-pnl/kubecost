@@ -1,0 +1,16 @@
+---
+extends: default
+ignore: |
+  .github/
+  .kilo/
+rules:
+  line-length: disable
+  truthy: disable
+  comments-indentation: disable
+  document-start: disable
+  empty-lines:
+    max: 2
+  braces:
+    max-spaces-inside: 1
+  brackets:
+    max-spaces-inside: 1
