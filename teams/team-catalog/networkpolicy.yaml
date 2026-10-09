@@ -1,0 +1,41 @@
+---
+# Default-deny ingress + egress (durcissement Phase 7).
+# Exceptions minimales pour ne pas casser l'observabilité ni la démo :
+#   - ingress : scraping Prometheus Kubecost (ns kubecost), service
+#     load-balancer svclb (ns kube-system), trafic intra-namespace
+#   - egress  : résolution DNS (kube-system:53), trafic intra-namespace
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: default-deny
+  namespace: team-catalog
+  labels:
+    team: team-catalog
+    product: catalog-api
+    env: lab
+spec:
+  podSelector: {}
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kubecost
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+        - podSelector: {}
+  egress:
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+      ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
+    - to:
+        - podSelector: {}

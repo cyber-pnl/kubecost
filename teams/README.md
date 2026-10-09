@@ -14,6 +14,7 @@ Namespaces et workloads des 4 équipes fictives. Chaque équipe a un **profil de
 - `namespace.yaml` — labels `team/product/env` + `ResourceQuota` + `LimitRange`
 - `deployment.yaml` — workloads légers avec `requests`/`limits` commentés
 - `behavior.md` — comportement simulé + signal Kubecost attendu
+- `networkpolicy.yaml` — default-deny ingress/egress + exceptions minimales
 - (catalog) `horizontalpodautoscaler.yaml`
 
 ## Règles
@@ -48,3 +49,26 @@ kubectl -n team-catalog get hpa
   le `my-wordpress` du namespace `default` (hors scope lab) bind déjà le
   host port 80 sur les 4 nodes via klipper-lb → un 2e LB sur 80 resterait
   `Pending` (conflit de ports).
+
+## Durcissement réseau (Phase 7)
+
+Chaque équipe a une `NetworkPolicy` **default-deny** (ingress + egress) avec
+des exceptions minimales pour préserver l'observabilité et la démo :
+
+| Direction | Exception | Raison |
+|---|---|---|
+| Ingress | namespace `kubecost` | scraping Prometheus (données de coût) |
+| Ingress | namespace `kube-system` | service load-balancer `svclb` |
+| Ingress | intra-namespace | app ↔ app |
+| Egress | `kube-system:53` (UDP/TCP) | résolution DNS |
+| Egress | intra-namespace | app ↔ app |
+
+k3s/k3d **applique** ces politiques (contrôleur intégré). Vérification :
+
+```bash
+# Bloqué : default -> team-catalog
+kubectl -n default exec dbg -- wget -qO- --timeout=4 \
+  http://catalog-api.team-catalog.svc.cluster.local; echo rc=$?   # rc=1
+# Autorisé : kubecost -> team-catalog (scraping)
+# Autorisé : intra-namespace ; Bloqué : team-catalog -> kubecost (egress)
+```
