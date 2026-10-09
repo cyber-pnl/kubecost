@@ -58,7 +58,27 @@ curl "http://localhost:9090/model/allocation?window=1d&aggregate=label:team"
 ```
 
 > Les premières données d'allocation apparaissent après ~15–25 min de collecte.
-> Les workloads d'équipe (labels `team`/`product`/`env`) arrivent en Phase 3.
+
+## Dashboards Grafana (bonus Phase 7)
+
+Grafana branché sur le Prometheus embarqué (requests vs usage, coût par nœud,
+pics HPA). Installation et accès : [`grafana/README.md`](grafana/README.md).
+
+```bash
+./kubecost/grafana/install-grafana.sh
+kubectl -n kubecost port-forward svc/grafana 3000:80   # → http://localhost:3000
+```
+
+## Alerting (exemple, non appliqué)
+
+`values-alerts.yaml.example` fournit un modèle d'alertes (budget par équipe,
+dérive hebdomadaire, alerte de diagnostic Kubecost). Il n'est **pas** appliqué
+par défaut : renseigner un webhook/email puis fusionner au `helm upgrade`.
+
+```bash
+helm upgrade kubecost kubecost/cost-analyzer -n kubecost \
+  -f kubecost/values.yaml -f kubecost/values-alerts.yaml
+```
 
 ## Règles
 

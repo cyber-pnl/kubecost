@@ -161,17 +161,20 @@ Logs dans `scripts/logs/`.
 
 ---
 
-## Phase 7 — Bonus & durcissement (optionnel)
+## Phase 7 — Bonus & durcissement (optionnel) 🚧
 
 **Objectif** : étendre la valeur du lab.
 
-- [ ] Dashboards Grafana custom branchés sur l'API Kubecost
-- [ ] Alerting Kubecost sur dérive budgétaire par équipe
-- [ ] NetworkPolicies deny-all par namespace
-- [ ] Scan des images (trivy) dans un job CI
-- [ ] VPA (mode `Off`) : recommandations visibles dans le dashboard
-- [ ] CI GitHub Actions : lint + commitlint + validation YAML
+- [x] Dashboards Grafana branchés sur le Prometheus de Kubecost (`kubecost/grafana/`)
+- [x] Alerting Kubecost sur dérive budgétaire par équipe (exemple `values-alerts.yaml.example`, non appliqué)
+- [x] NetworkPolicies deny-all par namespace (exceptions Kubecost/DNS/intra-ns, appliquées et testées)
+- [x] Scan des images (trivy) dans un job CI (`.github/workflows/ci.yml`)
+- [x] CI GitHub Actions : commitlint + yamllint + bash + py_compile + trivy
+- [ ] VPA (mode `Off`) : recommandations visibles dans le dashboard (non retenu)
 - [ ] (challenge) Autoscaling du cluster (k3d + karpenter est hors scope, documenter pourquoi)
+
+> Réalisé : CI, NetworkPolicies, Grafana (datasource + dashboard provisionnés),
+> alerting documenté. Restent VPA et l'autoscaling de nœuds (hors périmètre retenu).
 
 ---
 

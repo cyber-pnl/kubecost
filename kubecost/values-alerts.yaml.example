@@ -1,0 +1,43 @@
+---
+# Exemple d'alerting Kubecost (Phase 7 — bonus). **NON appliqué par défaut.**
+#
+# Schéma issu du chart cost-analyzer 2.8.x (`global.notifications.alertConfigs`).
+# Ref : https://www.ibm.com/docs/en/kubecost/self-hosted/2.x?topic=ui-alerts
+#
+# Pour l'activer, fusionner avec les valeurs courantes :
+#   helm upgrade kubecost kubecost/cost-analyzer -n kubecost \
+#     -f kubecost/values.yaml -f kubecost/values-alerts.yaml
+#
+# ⚠️  Renseigne un sink (webhook Slack/Teams ou emails) sinon aucune
+#     notification ne partira. Ne committe JAMAIS de vrai webhook/email.
+
+global:
+  notifications:
+    alertConfigs:
+      frontendUrl: http://localhost:9090
+      # globalSlackWebhookUrl: https://hooks.slack.com/services/CHANGEME
+      # globalAlertEmails:
+      #   - finops@example.com
+      alerts:
+        # Dépassement de budget mensuel pour l'équipe sur-dimensionnée.
+        - type: budget
+          threshold: 20            # $ sur la fenêtre
+          window: monthly
+          aggregation: label:team
+          filter: team-checkout
+        # Dépassement de budget mensuel agrégé sur tout le cluster.
+        - type: budget
+          threshold: 50
+          window: monthly
+          aggregation: cluster
+          filter: kubecost-lab
+        # Détection de dérive : rapport hebdomadaire de coût par namespace.
+        - type: recurringUpdate
+          window: weekly
+          aggregation: namespace
+          filter: '*'
+        # Alerte de santé : Kubecost ne peut plus calculer les coûts
+        # (ex. Prometheus injoignable) — utile pour la fiabilité du lab.
+        - type: diagnostic
+          window: 1d
+          threshold: 5

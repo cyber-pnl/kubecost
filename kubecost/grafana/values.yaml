@@ -1,0 +1,40 @@
+---
+# Grafana — dashboards FinOPS branchés sur le Prometheus embarqué par Kubecost.
+# Installation allégée (pas de persistance, ressources limitées) adaptée au lab.
+# Les dashboards proviennent des ConfigMaps labellisés `grafana_dashboard`.
+
+service:
+  type: ClusterIP
+
+persistence:
+  enabled: false
+
+# Mot de passe admin non défini ici (pas de secret en clair) : le chart en
+# génère un aléatoire → récupération :
+#   kubectl -n kubecost get secret grafana -o jsonpath='{.data.admin-password}' | base64 -d
+
+resources:
+  requests:
+    cpu: 50m
+    memory: 128Mi
+  limits:
+    cpu: 500m
+    memory: 384Mi
+
+# Datasource : Prometheus de Kubecost (source unique des métriques de coût).
+datasources:
+  datasources.yaml:
+    apiVersion: 1
+    datasources:
+      - name: Kubecost-Prometheus
+        type: prometheus
+        access: proxy
+        url: http://kubecost-prometheus-server.kubecost.svc.cluster.local
+        isDefault: true
+
+sidecar:
+  dashboards:
+    enabled: true
+    label: grafana_dashboard
+    searchNamespaces:
+      - kubecost

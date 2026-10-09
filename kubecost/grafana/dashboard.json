@@ -1,0 +1,74 @@
+{
+  "annotations": { "list": [] },
+  "editable": true,
+  "graphTooltip": 0,
+  "panels": [
+    {
+      "type": "timeseries",
+      "title": "CPU : requests (alloué) vs usage",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 },
+      "fieldConfig": { "defaults": { "unit": "none" }, "overrides": [] },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "sum(kube_pod_container_resource_requests{resource=\"cpu\", namespace=~\"team-.*\"}) by (namespace)",
+          "legendFormat": "requests {{namespace}}"
+        },
+        {
+          "refId": "B",
+          "expr": "sum(rate(container_cpu_usage_seconds_total{namespace=~\"team-.*\", container!=\"\"}[5m])) by (namespace)",
+          "legendFormat": "usage {{namespace}}"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Mémoire par équipe (working set)",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 },
+      "fieldConfig": { "defaults": { "unit": "bytes" }, "overrides": [] },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "sum(container_memory_working_set_bytes{namespace=~\"team-.*\", container!=\"\"}) by (namespace)",
+          "legendFormat": "{{namespace}}"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Coût horaire par nœud ($/h)",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 },
+      "fieldConfig": { "defaults": { "unit": "none" }, "overrides": [] },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "node_total_hourly_cost",
+          "legendFormat": "{{node}}"
+        }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "Coût cluster total ($/h)",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 8 },
+      "fieldConfig": { "defaults": { "unit": "none" }, "overrides": [] },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "sum(node_total_hourly_cost)",
+          "legendFormat": "total"
+        }
+      ]
+    }
+  ],
+  "schemaVersion": 39,
+  "tags": ["kubecost", "finops", "lab"],
+  "time": {
+    "from": "now-6h",
+    "to": "now"
+  },
+  "timezone": "browser",
+  "title": "Kubecost — Coûts par equipe",
+  "uid": "kubecost-teams",
+  "version": 1
+}

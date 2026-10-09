@@ -13,6 +13,7 @@ Scripts Bash **rejouables** qui déclenchent les comportements de coût à obser
 | `rightsize_demo.sh` | Rightsizing `team-checkout` + estimation d'économie (`--revert`) |
 | `reset_scenario.sh` | Nettoyage complet des namespaces (rejouable démo) |
 | `demo_full.sh` | Enchaîne reset → deploy → simulations → rapport (Phase 6) |
+| `open_dashboards.sh` | Port-forwards Kubecost + Grafana pour la démo/captures |
 
 ## Usage
 

@@ -21,7 +21,7 @@ Un cluster Kubernetes partagé et simulé (k3d), avec des équipes fictives aux 
 ./kubecost/install-kubecost.sh
 
 # 3. Déployer les 4 équipes simulées
-kubectl apply -f teams/
+./scripts/deploy_teams.sh
 
 # 4. Lancer les simulations de comportement
 ./scripts/simulate_overprovisioning.sh
@@ -29,8 +29,13 @@ kubectl apply -f teams/
 ./scripts/simulate_orphan_resources.sh
 
 # 5. Générer les rapports de chargeback
-python chargeback/fetch_kubecost_api.py
-python chargeback/generate_report.py
+python3 chargeback/generate_report.py --window 1d
+
+# (raccourci) tout enchaîner : reset → deploy → simulations → rapport
+./scripts/demo_full.sh
+
+# (bonus) dashboards Grafana FinOPS
+./kubecost/grafana/install-grafana.sh
 ```
 
 ---
@@ -87,14 +92,16 @@ kubecost-multitenant-lab/
 ├── README.md                # This file (overview)
 ├── AGENTS.md                # Règles & conventions pour agents
 ├── .commitlintrc            # Validation Conventional Commits
+├── .github/workflows/       # CI : commitlint, lint, trivy
 ├── cluster/                 # Provisioning k3d (config + scripts)
 ├── kubecost/                # Installation Helm + pricing custom
+│   └── grafana/             # Dashboards FinOPS (bonus)
 ├── teams/                   # 4 équipes simulées (namespaces + workloads)
 │   ├── team-checkout/
 │   ├── team-catalog/
 │   ├── team-search/
 │   └── team-platform/
-├── scripts/                 # Simulations de comportement + reset
+├── scripts/                 # Simulations + démo + reset
 ├── chargeback/              # Extraction API + génération de rapports
 └── docs/                    # Architecture, scénarios, FinOPS, roadmap
 ```
